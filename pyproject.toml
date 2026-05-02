@@ -6,4 +6,5 @@ readme = "README.md"
 requires-python = ">=3.11,<3.15"
 dependencies = [
     "google-adk[extensions]>=1.30.0,<2",
+    "oci>=2.168.0",
 ]
