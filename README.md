@@ -22,8 +22,6 @@
 │   ├── system_dev_specialist/
 │   │   ├── __init__.py          # ADK エントリ
 │   │   └── agent.py             # システム開発エンジニア（設計/実装/運用）
-│   └── multi_agent_sample/
-│       └── __init__.py          # 互換用（orchestrator に委譲）
 └── .adk/                        # （任意）ローカル保存の session/artifacts（無効化可能）
 ```
 
@@ -33,7 +31,6 @@
 - `agents/oci_expert/oci_llm.py`：OCI Generative AI Inference の `chat` API を呼び出す `OciGenerativeAiLlm` を提供します。`.env` の `OCI_COMPARTMENT_ID` / `OCI_MODEL_ID` / `OCI_CHAT_API_FORMAT`（モデルがCohere系かどうか）などを参照します。
 - `agents/oci_expert/web_search.py`：OCI専門家エージェントが利用する簡易Web検索（DuckDuckGo）を提供します。
 - `agents/system_dev_specialist/agent.py`：システム開発（設計/実装/運用）の観点で回答します。
-- `agents/multi_agent_sample/__init__.py`：互換用エントリ（`agents/orchestrator` へ委譲）です。
 - `.env.example`：`ADK_DISABLE_LOCAL_STORAGE=1`（セッションを in-memory）を既定にしつつ、OpenAI/OCI の設定例を載せています。
 
 ### セットアップ
@@ -65,6 +62,3 @@ uv run adk web agents
 ```
 
 ブラウザで `http://localhost:8000` を開き、`orchestrator` を選択してチャットしてください。
-
-補足:
-- `multi_agent_sample` は互換用エントリで、内部的に `orchestrator` を呼び出します（基本は `orchestrator` を選んでください）。
