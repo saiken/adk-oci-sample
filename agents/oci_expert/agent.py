@@ -16,8 +16,8 @@ oci_query_agent = LlmAgent(
     description="OCI領域タスクからWeb検索用クエリーを生成する。",
     generate_content_config=GEN_CONFIG,
     instruction=(
-        "OCI領域タスク:\n{task_breakdown}\n\n"
-        "oci_task を満たすために必要なWeb検索クエリーを3〜6個作り、JSON配列のみで出力してください。\n"
+        "タスク分解（テキスト）:\n{task_breakdown}\n\n"
+        "上の内容から、OCI領域(oci_task) を満たすために必要なWeb検索クエリーを3〜6個作り、JSON配列のみで出力してください。\n"
         '例: ["query1", "query2"]\n'
         "日本語/英語は適切に混ぜてください。"
     ),
@@ -45,9 +45,9 @@ oci_expert_agent = LlmAgent(
     description="検索結果を根拠にOCI領域の回答を生成する。",
     generate_content_config=GEN_CONFIG,
     instruction=(
-        "OCI領域タスク:\n{task_breakdown}\n\n"
+        "タスク分解（テキスト）:\n{task_breakdown}\n\n"
         "検索メモ:\n{oci_search_notes}\n\n"
-        "上記を根拠として、oci_task に答えてください。\n"
+        "上記を根拠として、oci_task に答えてください（タスク分解テキストのOCI領域の記述を優先）。\n"
         "不確実な点は断定せず、追加で確認すべき観点も短く添えてください。\n"
         "出力は日本語で。"
     ),

@@ -11,8 +11,8 @@ root_agent = LlmAgent(
     description="システム開発エンジニアの観点で実現方法を検討して回答する。",
     generate_content_config=GEN_CONFIG,
     instruction=(
-        "タスク分解:\n{task_breakdown}\n\n"
-        "system_task に対して、設計・実装・運用の観点で具体的に回答してください。\n"
+        "タスク分解（テキスト）:\n{task_breakdown}\n\n"
+        "上の内容から system_task を読み取り、設計・実装・運用の観点で具体的に回答してください。\n"
         "必要なら、簡単な手順/構成案/落とし穴も含めてください。\n"
         "日本語で。"
     ),
