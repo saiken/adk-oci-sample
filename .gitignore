@@ -1,0 +1,26 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+
+# Virtual environments
+.venv
+
+# Local env files (secrets)
+.env
+.env.*
+!.env.example
+
+# ADK local storage (sessions/artifacts)
+.adk/
+
+# ADK session exports (optional)
+*.session.json
