@@ -25,8 +25,8 @@ def get_default_model() -> str | BaseLlm:
 def get_generate_content_config() -> types.GenerateContentConfig:
   """Returns a shared GenerateContentConfig for agents."""
   max_output_tokens = int(os.getenv("ADK_MAX_OUTPUT_TOKENS", "1024"))
-  temperature = float(os.getenv("ADK_TEMPERATURE", "0.2"))
-  top_p = float(os.getenv("ADK_TOP_P", "0.9"))
+  temperature = float(os.getenv("ADK_TEMPERATURE", "0.0"))
+  top_p = float(os.getenv("ADK_TOP_P", "0.75"))
   return types.GenerateContentConfig(
       max_output_tokens=max_output_tokens,
       temperature=temperature,
