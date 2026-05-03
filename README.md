@@ -50,12 +50,6 @@ cp .env.example .env
 
 `.env` を編集して、`ADK_MODEL` と必要なキー/OCI設定を入れてください。デフォルトでは `ADK_DISABLE_LOCAL_STORAGE=1` により、セッションを in-memory で扱い（`.adk/session.db` を作りません）。
 
-### 実行 (CLI)
-
-```bash
-uv run adk run agents/orchestrator
-```
-
 ### 実行 (API / FastAPI)
 
 `main.py` を起動すると `uvicorn` で FastAPI を立ち上げ、`POST /message` でオーケストレーターエージェントを実行できます。
@@ -87,7 +81,7 @@ curl -s -X POST http://127.0.0.1:8000/message \
 `adk web` は「エージェントディレクトリ群」を含む親ディレクトリから起動します。
 
 ```bash
-uv run adk web agents
+PYTHONPATH=. uv run adk web agents
 ```
 
 ブラウザで `http://localhost:8000` を開き、`orchestrator` を選択してチャットしてください。
