@@ -70,6 +70,10 @@ curl -s -X POST http://127.0.0.1:8000/message \
   -d '{"message":"こんにちは。OCI Generative AI の概要を教えて"}'
 ```
 
+ローカルで `.env` を読み込みたい場合は、次のいずれかを指定してください:
+- `ENV=local uv run python main.py`
+- `LOAD_DOTENV=1 uv run python main.py`
+
 ### 実行 (Web UI)
 
 `adk web` は「エージェントディレクトリ群」を含む親ディレクトリから起動します。

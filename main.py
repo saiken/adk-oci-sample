@@ -11,13 +11,28 @@ from typing import Optional
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from dotenv import load_dotenv
 
 # Make `agents/*` importable as top-level packages (common/orchestrator/etc).
 sys.path.insert(0, str(Path(__file__).parent / "agents"))
 
-# Load environment variables from .env at repo root (if present).
-load_dotenv(Path(__file__).parent / ".env")
+def _env_flag(name: str) -> bool:
+  value = os.getenv(name, "").strip().lower()
+  return value in ("1", "true", "yes", "on")
+
+
+def _maybe_load_dotenv() -> None:
+  # In OCI (prod), prefer injecting environment variables via the runtime
+  # (e.g., deployment config / secrets). Enable dotenv only for local/dev.
+  env = os.getenv("ENV", "").strip().lower()
+  if env in ("local", "dev") or _env_flag("LOAD_DOTENV"):
+    try:
+      from dotenv import load_dotenv  # type: ignore
+    except Exception:
+      return
+    load_dotenv(Path(__file__).parent / ".env")
+
+
+_maybe_load_dotenv()
 
 logging.basicConfig(
     level=getattr(logging, os.getenv("LOG_LEVEL", "INFO").upper(), logging.INFO),
