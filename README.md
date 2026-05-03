@@ -11,13 +11,16 @@
 ├── pyproject.toml               # 依存関係（google-adk / oci など）
 ├── uv.lock
 ├── agents/
+│   ├── common/
+│   │   ├── __init__.py
+│   │   ├── model.py             # 全エージェント共通のモデル設定
+│   │   └── oci_llm.py           # OCI Generative AI 用 LLM アダプタ（共通）
 │   ├── orchestrator/
 │   │   ├── __init__.py          # ADK エントリ
 │   │   └── agent.py             # 全体オーケストレーション（分解→依頼→統合）
 │   ├── oci_expert/
 │   │   ├── __init__.py          # ADK エントリ
 │   │   ├── agent.py             # OCI専門家（クエリ生成→検索→回答）
-│   │   ├── oci_llm.py           # OCI Generative AI 用 LLM アダプタ
 │   │   └── web_search.py        # Web検索ツール（DuckDuckGo HTML）
 │   ├── system_dev_specialist/
 │   │   ├── __init__.py          # ADK エントリ
@@ -28,7 +31,7 @@
 主な処理内容:
 - `agents/orchestrator/agent.py`：オーケストレーション（タスク分解→領域別実行→統合）で回答を生成します。
 - `agents/oci_expert/agent.py`：OCI専門家（クエリ生成→検索→回答）を担当します。
-- `agents/oci_expert/oci_llm.py`：OCI Generative AI Inference の `chat` API を呼び出す `OciGenerativeAiLlm` を提供します。`.env` の `OCI_COMPARTMENT_ID` / `OCI_MODEL_ID` / `OCI_CHAT_API_FORMAT`（モデルがCohere系かどうか）などを参照します。
+- `agents/common/oci_llm.py`：OCI Generative AI Inference の `chat` API を呼び出す `OciGenerativeAiLlm`（全エージェント共通）を提供します。`.env` の `OCI_COMPARTMENT_ID` / `OCI_MODEL_ID` / `OCI_CHAT_API_FORMAT`（モデルがCohere系かどうか）などを参照します。
 - `agents/oci_expert/web_search.py`：OCI専門家エージェントが利用する簡易Web検索（DuckDuckGo）を提供します。
 - `agents/system_dev_specialist/agent.py`：システム開発（設計/実装/運用）の観点で回答します。
 - `.env.example`：`ADK_DISABLE_LOCAL_STORAGE=1`（セッションを in-memory）を既定にしつつ、OpenAI/OCI の設定例を載せています。
