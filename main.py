@@ -115,15 +115,9 @@ def _get_session_lock(user_id: str, session_id: str) -> asyncio.Lock:
 async def _ensure_session(*, user_id: str, session_id: str) -> None:
   lock = _get_session_lock(user_id, session_id)
   async with lock:
-    # Prefer a non-exceptional "check then create" flow. Depending on the ADK
-    # version, get_session may return None or raise when missing; handle both.
-    session = None
-    try:
-      session = await session_service.get_session(
-          app_name=APP_NAME, user_id=user_id, session_id=session_id
-      )
-    except Exception:
-      session = None
+    session = await session_service.get_session(
+        app_name=APP_NAME, user_id=user_id, session_id=session_id
+    )
 
     if session is None:
       await session_service.create_session(
@@ -132,10 +126,6 @@ async def _ensure_session(*, user_id: str, session_id: str) -> None:
 
 
 def _get_user_and_session_id(request: Request) -> Tuple[str, str]:
-  # Session isolation without login:
-  # - user_id and session_id are the same value.
-  # - If the client supplies X-Session-Id, we keep conversation state.
-  # - Otherwise, we generate a UUID so sessions never collide.
   session_id = (request.headers.get("x-session-id") or "").strip()
   if not session_id:
     session_id = uuid.uuid4().hex
@@ -173,14 +163,10 @@ def _safe_is_final(event: object) -> bool:
 
 
 def _safe_function_calls_count(event: object) -> tuple[int, int]:
-  try:
-    calls = getattr(event, "get_function_calls")()
-  except Exception:
-    calls = []
-  try:
-    responses = getattr(event, "get_function_responses")()
-  except Exception:
-    responses = []
+  func = getattr(event, "get_function_calls", None)
+  calls = func() if callable(func) else []
+  func = getattr(event, "get_function_responses", None)
+  responses = func() if callable(func) else []
   return (len(calls) if calls else 0, len(responses) if responses else 0)
 
 
