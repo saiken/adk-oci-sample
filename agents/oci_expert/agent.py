@@ -3,7 +3,7 @@ import os
 from google.adk.agents import LlmAgent, SequentialAgent
 from google.adk.tools.function_tool import FunctionTool
 
-from common.model import get_default_model, get_generate_content_config
+from agents.common.model import get_default_model, get_generate_content_config
 from .web_search import web_search_duckduckgo
 
 MODEL = get_default_model()

@@ -9,11 +9,8 @@ from pathlib import Path
 from typing import Optional
 
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
-
-# Make `agents/*` importable as top-level packages (common/orchestrator/etc).
-sys.path.insert(0, str(Path(__file__).parent / "agents"))
 
 def _env_flag(name: str) -> bool:
   value = os.getenv(name, "").strip().lower()
@@ -44,32 +41,41 @@ from google.adk import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
 
-from orchestrator.agent import root_agent
+from agents.orchestrator.agent import root_agent
 
-
-APP_NAME = os.getenv("ADK_APP_NAME", "adk-oci-sample")
-USER_ID = os.getenv("ADK_USER_ID", "user")
-SESSION_ID = os.getenv("ADK_SESSION_ID", "default")
+APP_NAME = "adk-oci-sample"
 
 session_service = InMemorySessionService()
 runner = Runner(app_name=APP_NAME, agent=root_agent, session_service=session_service)
 
-_session_lock = asyncio.Lock()
+_session_locks: dict[tuple[str, str], asyncio.Lock] = {}
 
 
-async def _ensure_session() -> None:
-  async with _session_lock:
-    # Be conservative: always attempt to create first. If it already exists,
-    # fall back to get_session. This avoids "session not found" races/edge-cases
-    # across ADK versions.
+def _get_session_lock(user_id: str, session_id: str) -> asyncio.Lock:
+  key = (user_id, session_id)
+  lock = _session_locks.get(key)
+  if lock is None:
+    lock = asyncio.Lock()
+    _session_locks[key] = lock
+  return lock
+
+
+async def _ensure_session(*, user_id: str, session_id: str) -> None:
+  lock = _get_session_lock(user_id, session_id)
+  async with lock:
+    # Prefer a non-exceptional "check then create" flow. Depending on the ADK
+    # version, get_session may return None or raise when missing; handle both.
+    session = None
     try:
-      await session_service.create_session(
-          app_name=APP_NAME, user_id=USER_ID, session_id=SESSION_ID
+      session = await session_service.get_session(
+          app_name=APP_NAME, user_id=user_id, session_id=session_id
       )
-      return
     except Exception:
-      await session_service.get_session(
-          app_name=APP_NAME, user_id=USER_ID, session_id=SESSION_ID
+      session = None
+
+    if session is None:
+      await session_service.create_session(
+          app_name=APP_NAME, user_id=user_id, session_id=session_id
       )
 
 
@@ -78,6 +84,7 @@ class MessageRequest(BaseModel):
 
 
 class MessageResponse(BaseModel):
+  session_id: str
   response: str
 
 
@@ -85,15 +92,30 @@ app = FastAPI(title="ADK Agent API", version="0.1.0")
 
 
 @app.post("/message", response_model=MessageResponse)
-async def post_message(payload: MessageRequest) -> MessageResponse:
+async def post_message(payload: MessageRequest, request: Request) -> MessageResponse:
   request_id = uuid.uuid4().hex[:12]
   message = (payload.message or "").strip()
   if not message:
     raise HTTPException(status_code=400, detail="`message` is required.")
 
-  logger.info("[%s] request message=%r", request_id, message)
+  # Session isolation without login:
+  # - user_id and session_id are the same value.
+  # - If the client supplies X-Session-Id, we keep conversation state.
+  # - Otherwise, we generate a UUID so sessions never collide.
+  session_id = ((request.headers.get("x-session-id") or "")).strip()
+  if not session_id:
+    session_id = uuid.uuid4().hex
+  user_id = session_id
 
-  await _ensure_session()
+  logger.info(
+      "[%s] request user_id=%s session_id=%s message=%r",
+      request_id,
+      user_id,
+      session_id,
+      message,
+  )
+
+  await _ensure_session(user_id=user_id, session_id=session_id)
 
   user_content = types.Content(role="user", parts=[types.Part(text=message)])
 
@@ -102,7 +124,7 @@ async def post_message(payload: MessageRequest) -> MessageResponse:
   last_text: str = ""
   try:
     async for event in runner.run_async(
-        user_id=USER_ID, session_id=SESSION_ID, new_message=user_content
+        user_id=user_id, session_id=session_id, new_message=user_content
     ):
       author = getattr(event, "author", "unknown")
       partial = bool(getattr(event, "partial", False))
@@ -168,7 +190,7 @@ async def post_message(payload: MessageRequest) -> MessageResponse:
   if not final_text:
     final_text = full_stream_text.strip() or last_text.strip() or ""
   logger.info("[%s] response=%r", request_id, final_text[:1000])
-  return MessageResponse(response=final_text)
+  return MessageResponse(session_id=session_id, response=final_text)
 
 
 def main() -> None:

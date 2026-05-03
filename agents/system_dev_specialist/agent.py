@@ -1,6 +1,6 @@
 from google.adk.agents import LlmAgent
 
-from common.model import get_default_model, get_generate_content_config
+from agents.common.model import get_default_model, get_generate_content_config
 
 MODEL = get_default_model()
 GEN_CONFIG = get_generate_content_config()

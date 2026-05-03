@@ -1,8 +1,8 @@
 from google.adk.agents import LlmAgent, ParallelAgent, SequentialAgent
 
-from common.model import get_default_model, get_generate_content_config
-from oci_expert.agent import root_agent as oci_root_agent
-from system_dev_specialist.agent import root_agent as system_root_agent
+from agents.common.model import get_default_model, get_generate_content_config
+from agents.oci_expert.agent import root_agent as oci_root_agent
+from agents.system_dev_specialist.agent import root_agent as system_root_agent
 
 MODEL = get_default_model()
 GEN_CONFIG = get_generate_content_config()

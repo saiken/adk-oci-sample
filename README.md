@@ -70,6 +70,15 @@ curl -s -X POST http://127.0.0.1:8000/message \
   -d '{"message":"こんにちは。OCI Generative AI の概要を教えて"}'
 ```
 
+会話の継続（セッションを固定）したい場合は、ヘッダーで `X-Session-Id` を指定してください（未指定の場合はUUIDで新規セッションが払い出され、レスポンスに `session_id` が返ります）。
+
+```bash
+curl -s -X POST http://127.0.0.1:8000/message \
+  -H 'content-type: application/json' \
+  -H 'X-Session-Id: chat-001' \
+  -d '{"message":"前の続きでお願いします"}'
+```
+
 ローカルで `.env` を読み込みたい場合は、次のいずれかを指定してください:
 - `ENV=local uv run python main.py`
 - `LOAD_DOTENV=1 uv run python main.py`
