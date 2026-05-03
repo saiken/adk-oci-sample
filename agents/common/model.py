@@ -15,7 +15,7 @@ def get_default_model() -> str | BaseLlm:
   """
   adk_model = os.getenv("ADK_MODEL", "openai").strip().lower()
   if adk_model == "oci":
-    from common.oci_llm import OciGenerativeAiLlm
+    from agents.common.oci_llm import OciGenerativeAiLlm
 
     return OciGenerativeAiLlm.from_env()
 
