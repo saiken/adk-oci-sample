@@ -56,6 +56,20 @@ cp .env.example .env
 uv run adk run agents/orchestrator
 ```
 
+### 実行 (API / FastAPI)
+
+`main.py` を起動すると `uvicorn` で FastAPI を立ち上げ、`POST /message` でオーケストレーターエージェントを実行できます。
+
+```bash
+uv run python main.py
+```
+
+```bash
+curl -s -X POST http://127.0.0.1:8000/message \
+  -H 'content-type: application/json' \
+  -d '{"message":"こんにちは。OCI Generative AI の概要を教えて"}'
+```
+
 ### 実行 (Web UI)
 
 `adk web` は「エージェントディレクトリ群」を含む親ディレクトリから起動します。
