@@ -73,8 +73,7 @@ curl -s -X POST http://127.0.0.1:8000/message \
   -d '{"message":"前の続きでお願いします"}'
 ```
 
-ローカルで `.env` を読み込みたい場合は、次のいずれかを指定してください:
-- `ENV=local uv run python main.py`
+`main.py` は、同じディレクトリに `.env` があれば自動で読み込みます（既に設定されている環境変数は上書きしません）。
 
 ### 実行 (Web UI)
 

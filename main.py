@@ -10,21 +10,10 @@ from typing import Optional, Tuple
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
+from dotenv import load_dotenv  # type: ignore
 
 
-def _maybe_load_dotenv() -> None:
-  # In OCI (prod), prefer injecting environment variables via the runtime
-  # (e.g., deployment config / secrets). Enable dotenv only for local/dev.
-  env = os.getenv("ENV", "").strip().lower()
-  if env == "local":
-    try:
-      from dotenv import load_dotenv  # type: ignore
-    except Exception:
-      return
-    load_dotenv(Path(__file__).parent / ".env")
-
-
-_maybe_load_dotenv()
+load_dotenv(override=False)
 
 logging.basicConfig(
     level=getattr(logging, os.getenv("LOG_LEVEL", "INFO").upper(), logging.INFO),
