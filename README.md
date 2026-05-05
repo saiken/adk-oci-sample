@@ -73,8 +73,7 @@ curl -s -X POST http://127.0.0.1:8000/message \
   -d '{"message":"前の続きでお願いします"}'
 ```
 
-ローカルで `.env` を読み込みたい場合は、次のいずれかを指定してください:
-- `ENV=local uv run python main.py`
+`main.py` は、同じディレクトリに `.env` があれば自動で読み込みます（既に設定されている環境変数は上書きしません）。
 
 ### 実行 (Web UI)
 
@@ -85,3 +84,25 @@ PYTHONPATH=. uv run adk web agents
 ```
 
 ブラウザで `http://localhost:8000` を開き、`orchestrator` を選択してチャットしてください。
+
+
+### OCIRへPUSH
+- 環境変数の設定
+```
+export REGION_KEY=kix # 大阪リージョン
+export NAMESPACE={ネームスペース} # OCIRの画面から取得
+export USERNAME="{メールアドレス}"
+export REPO={OCIRのリポジトリ名}
+export TOKEN={TOKEN} # OCIのAuth Tokenを設定
+```
+
+- docker login
+```
+$ echo $TOKEN | docker login "$REGION_KEY.ocir.io" -u "$NAMESPACE/$USERNAME" --password-stdin
+Login Succeeded
+```
+
+- docker build
+```
+$ docker build -t "$REGION_KEY.ocir.io/$NAMESPACE/$REPO:latest" .
+```
